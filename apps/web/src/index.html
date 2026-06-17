@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open Music Service</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Open Music Service</p>
+          <h1>Полные треки из открытого каталога</h1>
+          <p class="lead">
+            Прототип ищет только музыку, которую открытая API отдает для полного
+            воспроизведения. 30-секундные фрагменты специально скрыты.
+          </p>
+        </div>
+        <form class="search" id="search-form">
+          <label for="query">Поиск трека, исполнителя или альбома</label>
+          <div class="search-row">
+            <input id="query" name="query" type="search" value="lofi" autocomplete="off" />
+            <button type="submit">Найти</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="content">
+        <aside class="player-panel">
+          <p class="panel-title">Плеер</p>
+          <img id="player-cover" class="player-cover" src="/logo.svg" alt="" />
+          <h2 id="player-title">Выберите трек</h2>
+          <p id="player-artist">Здесь воспроизводятся только полные треки из открытого источника.</p>
+          <audio id="audio" controls></audio>
+          <a id="source-link" class="source-link" href="#" target="_blank" rel="noreferrer">
+            Открыть источник
+          </a>
+        </aside>
+
+        <section class="results-panel">
+          <div class="results-head">
+            <h2>Результаты</h2>
+            <span id="status">Готов к поиску</span>
+          </div>
+          <div id="results" class="results"></div>
+        </section>
+      </section>
+    </main>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
