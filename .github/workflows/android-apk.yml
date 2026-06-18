@@ -6,6 +6,9 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+
 jobs:
   build-android:
     runs-on: ubuntu-latest
@@ -24,7 +27,7 @@ jobs:
 
       - uses: android-actions/setup-android@v3
 
-      - run: npm install
+      - run: npm ci
 
       - name: Configure API base
         run: |
@@ -39,7 +42,19 @@ jobs:
       - run: ./gradlew assembleDebug
         working-directory: android
 
+      - name: Prepare APK file
+        run: |
+          mkdir -p release
+          cp android/app/build/outputs/apk/debug/app-debug.apk release/Wavebox-debug.apk
+
       - uses: actions/upload-artifact@v4
         with:
           name: wavebox-android-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: release/Wavebox-debug.apk
+
+      - name: Publish direct APK download
+        run: |
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest release/Wavebox-debug.apk --title "Wavebox Android latest" --notes "Latest debug APK. Download the .apk file directly, not the Actions artifact zip." --prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}

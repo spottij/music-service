@@ -38,7 +38,9 @@ gradlew assembleDebug
 
 1. Открой вкладку `Actions`.
 2. Запусти workflow `Build Android APK`.
-3. Скачай artifact `wavebox-android-apk`.
+3. Лучше скачай прямой файл `Wavebox-debug.apk` из release `Wavebox Android latest`.
+4. Если скачиваешь artifact `wavebox-android-apk`, GitHub отдаст `.zip`. Его нужно
+   сначала распаковать, а устанавливать уже `.apk` внутри архива.
 
 Для рабочего поиска в APK нужен доступный backend URL. Его можно задать в
 GitHub Secrets как `WAVEBOX_API_BASE`, например:
@@ -49,3 +51,7 @@ https://example.com
 
 Если secret пустой, APK соберется, но запросы будут идти относительно
 локального WebView и backend API не будет найден.
+
+Если Android пишет "не удалось обработать пакет", чаще всего был установлен
+скачанный `.zip`, а не `.apk`, или версия Android ниже минимальной версии,
+которую поддерживает Capacitor.

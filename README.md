@@ -85,3 +85,7 @@ workflow `Build Windows EXE`, который собирает скачиваем
 Сборка описана в [docs/packaging.md](docs/packaging.md). На GitHub добавлен
 workflow `Build Android APK`. Для рабочего поиска в APK нужен backend URL в
 secret `WAVEBOX_API_BASE`.
+
+GitHub Actions artifacts скачиваются как `.zip`. Для установки на телефон
+нужно распаковать архив и запускать `.apk` внутри него. Также workflow
+публикует прямой APK в release `Wavebox Android latest`.
