@@ -21,6 +21,7 @@
 - Audio-плеер для прямых `streamUrl`.
 - Ссылка на страницу источника.
 - Desktop-упаковка под Windows через Electron.
+- Android APK workflow через Capacitor.
 
 ## Структура
 
@@ -78,3 +79,9 @@ node --check apps/web/src/app.js
 
 Сборка описана в [docs/packaging.md](docs/packaging.md). На GitHub добавлен
 workflow `Build Windows EXE`, который собирает скачиваемый artifact.
+
+## Android APK
+
+Сборка описана в [docs/packaging.md](docs/packaging.md). На GitHub добавлен
+workflow `Build Android APK`. Для рабочего поиска в APK нужен backend URL в
+secret `WAVEBOX_API_BASE`.

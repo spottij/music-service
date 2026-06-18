@@ -14,6 +14,7 @@ const miniArtist = document.querySelector("#mini-artist");
 const sourceLink = document.querySelector("#source-link");
 const lyricsButton = document.querySelector("#lyrics-button");
 const lyricsText = document.querySelector("#lyrics-text");
+const apiBase = window.WAVEBOX_CONFIG?.apiBase || "";
 
 let currentTrack = null;
 
@@ -64,7 +65,7 @@ async function loadLyrics(track) {
 
   const artist = normalizeLyricsQuery(track.artistName);
   const title = normalizeLyricsQuery(track.title);
-  const response = await fetch(`/api/v1/lyrics?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(title)}`);
+  const response = await fetch(`${apiBase}/api/v1/lyrics?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(title)}`);
   const payload = await response.json();
 
   lyricsButton.disabled = false;
@@ -161,7 +162,7 @@ async function searchTracks(query) {
   setStatus("Ищу треки...");
   results.innerHTML = '<p class="empty">Запрашиваю YouTube и открытые аудиокаталоги.</p>';
 
-  const response = await fetch(`/api/v1/search?q=${encodeURIComponent(query)}&limit=6`);
+  const response = await fetch(`${apiBase}/api/v1/search?q=${encodeURIComponent(query)}&limit=6`);
   const payload = await response.json();
 
   if (!response.ok) {

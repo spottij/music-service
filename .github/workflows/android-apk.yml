@@ -1,0 +1,45 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - run: npm install
+
+      - name: Configure API base
+        run: |
+          node -e "const fs=require('fs'); const value=process.env.WAVEBOX_API_BASE || ''; if (value) fs.writeFileSync('apps/web/src/config.js', 'window.WAVEBOX_CONFIG = {\\n  apiBase: ' + JSON.stringify(value) + '\\n};\\n');"
+        env:
+          WAVEBOX_API_BASE: ${{ secrets.WAVEBOX_API_BASE }}
+
+      - run: npx cap add android
+
+      - run: npx cap copy android
+
+      - run: ./gradlew assembleDebug
+        working-directory: android
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wavebox-android-apk
+          path: android/app/build/outputs/apk/debug/*.apk

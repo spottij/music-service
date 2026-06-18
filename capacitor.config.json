@@ -1,0 +1,8 @@
+{
+  "appId": "ru.urfu.wavebox",
+  "appName": "Wavebox",
+  "webDir": "apps/web/src",
+  "server": {
+    "androidScheme": "https"
+  }
+}
