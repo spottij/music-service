@@ -5,6 +5,8 @@ const statusLabel = document.querySelector("#status");
 const audio = document.querySelector("#audio");
 const playerCover = document.querySelector("#player-cover");
 const miniCover = document.querySelector("#mini-cover");
+const videoPlayer = document.querySelector("#video-player");
+const detailsPanel = document.querySelector(".details-panel");
 const playerTitle = document.querySelector("#player-title");
 const playerArtist = document.querySelector("#player-artist");
 const miniTitle = document.querySelector("#mini-title");
@@ -50,6 +52,17 @@ function setPlayer(track) {
   miniArtist.textContent = subtitle;
   sourceLink.href = track.sourceUrl || "#";
 
+  if (track.embedUrl) {
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+    videoPlayer.src = track.embedUrl;
+    detailsPanel.classList.add("video-mode");
+    return;
+  }
+
+  videoPlayer.removeAttribute("src");
+  detailsPanel.classList.remove("video-mode");
   audio.src = track.streamUrl;
   audio.play().catch(() => {});
 }
@@ -68,6 +81,7 @@ function renderTracks(tracks) {
 
     const duration = formatDuration(track.durationSeconds);
     const providers = track.providers || [track.provider];
+    const playbackLabel = track.embedUrl ? "YouTube" : "полный трек";
     const title = escapeHtml(track.title || "Без названия");
     const artistName = escapeHtml(track.artistName || "Неизвестный исполнитель");
     const coverUrl = escapeAttribute(track.coverUrl || "/logo.svg");
@@ -80,7 +94,7 @@ function renderTracks(tracks) {
         <p>${artistName}${duration ? ` · ${duration}` : ""}</p>
         <div class="badges">
           ${providers.map((provider) => `<span class="badge">${escapeHtml(provider)}</span>`).join("")}
-          <span class="badge">полный трек</span>
+          <span class="badge">${playbackLabel}</span>
         </div>
       </div>
       <div class="track-actions">
@@ -95,8 +109,8 @@ function renderTracks(tracks) {
 }
 
 async function searchTracks(query) {
-  setStatus("Ищу полные треки...");
-  results.innerHTML = '<p class="empty">Запрашиваю открытые каталоги. 30-секундные фрагменты не показываются.</p>';
+  setStatus("Ищу треки...");
+  results.innerHTML = '<p class="empty">Запрашиваю YouTube и открытые аудиокаталоги.</p>';
 
   const response = await fetch(`/api/v1/search?q=${encodeURIComponent(query)}&limit=6`);
   const payload = await response.json();
@@ -106,7 +120,7 @@ async function searchTracks(query) {
   }
 
   renderTracks(payload.items);
-  setStatus(`Полных треков: ${payload.count}`);
+  setStatus(`Найдено: ${payload.count}`);
 }
 
 form.addEventListener("submit", async (event) => {

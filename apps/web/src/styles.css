@@ -338,6 +338,23 @@ h1 {
   background: #202733;
 }
 
+.video-player {
+  display: none;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 8px;
+  background: #05070a;
+}
+
+.details-panel.video-mode .player-cover {
+  display: none;
+}
+
+.details-panel.video-mode .video-player {
+  display: block;
+}
+
 .track-meta {
   margin-top: 16px;
 }

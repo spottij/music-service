@@ -1,8 +1,9 @@
 import { searchAudiusTracks } from "./audius.js";
 import { searchInternetArchiveTracks } from "./internetArchive.js";
+import { searchYoutubeTracks } from "./youtube.js";
 import { createDedupeKey } from "../../shared/src/track.js";
 
-const providers = [searchInternetArchiveTracks, searchAudiusTracks];
+const providers = [searchYoutubeTracks, searchInternetArchiveTracks, searchAudiusTracks];
 
 export async function searchAllProviders(query, limit = 20) {
   const settled = await Promise.allSettled(
@@ -12,7 +13,7 @@ export async function searchAllProviders(query, limit = 20) {
   const tracks = settled
     .filter((result) => result.status === "fulfilled")
     .flatMap((result) => result.value)
-    .filter((track) => track.streamUrl);
+    .filter((track) => track.streamUrl || track.embedUrl);
 
   const byKey = new Map();
 
