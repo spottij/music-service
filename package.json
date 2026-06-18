@@ -9,7 +9,7 @@
     "dev": "node apps/api/src/server.js",
     "check": "node --check apps/api/src/server.js && node --check packages/providers/src/index.js && node --check packages/providers/src/internetArchive.js && node --check packages/providers/src/audius.js && node --check packages/providers/src/youtube.js && node --check packages/shared/src/track.js && node --check apps/web/src/app.js && node --check desktop/main.cjs",
     "desktop": "electron .",
-    "package:win": "electron-builder --win nsis --x64",
+    "package:win": "electron-builder --win nsis --x64 --publish never",
     "android:add": "cap add android",
     "android:copy": "cap copy android"
   },
