@@ -4,8 +4,11 @@ const results = document.querySelector("#results");
 const statusLabel = document.querySelector("#status");
 const audio = document.querySelector("#audio");
 const playerCover = document.querySelector("#player-cover");
+const miniCover = document.querySelector("#mini-cover");
 const playerTitle = document.querySelector("#player-title");
 const playerArtist = document.querySelector("#player-artist");
+const miniTitle = document.querySelector("#mini-title");
+const miniArtist = document.querySelector("#mini-artist");
 const sourceLink = document.querySelector("#source-link");
 
 function formatDuration(seconds) {
@@ -36,9 +39,15 @@ function setStatus(text) {
 }
 
 function setPlayer(track) {
-  playerCover.src = track.coverUrl || "/logo.svg";
+  const cover = track.coverUrl || "/logo.svg";
+  const subtitle = `${track.artistName}${track.albumTitle ? ` · ${track.albumTitle}` : ""}`;
+
+  playerCover.src = cover;
+  miniCover.src = cover;
   playerTitle.textContent = track.title;
-  playerArtist.textContent = `${track.artistName}${track.albumTitle ? ` · ${track.albumTitle}` : ""}`;
+  miniTitle.textContent = track.title;
+  playerArtist.textContent = subtitle;
+  miniArtist.textContent = subtitle;
   sourceLink.href = track.sourceUrl || "#";
 
   audio.src = track.streamUrl;

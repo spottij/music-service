@@ -3,50 +3,82 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Open Music Service</title>
+    <title>Wavebox</title>
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <main class="shell">
-      <section class="hero">
-        <div>
-          <p class="eyebrow">Open Music Service</p>
-          <h1>Полные треки из открытого каталога</h1>
-          <p class="lead">
-            Прототип ищет только музыку, которую открытая API отдает для полного
-            воспроизведения. 30-секундные фрагменты специально скрыты.
-          </p>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/">
+          <img src="/logo.svg" alt="" />
+          <span>Wavebox</span>
+        </a>
+
+        <nav class="nav">
+          <a class="nav-link active" href="#search">Поиск</a>
+          <a class="nav-link" href="#library">Коллекция</a>
+          <a class="nav-link" href="#lyrics">Тексты</a>
+        </nav>
+
+        <div class="sidebar-note">
+          Полные треки из открытых источников. Без 30-секундных фрагментов.
         </div>
-        <form class="search" id="search-form">
-          <label for="query">Поиск трека, исполнителя или альбома</label>
-          <div class="search-row">
-            <input id="query" name="query" type="search" value="lofi" autocomplete="off" />
-            <button type="submit">Найти</button>
-          </div>
-        </form>
-      </section>
+      </aside>
 
-      <section class="content">
-        <aside class="player-panel">
-          <p class="panel-title">Плеер</p>
-          <img id="player-cover" class="player-cover" src="/logo.svg" alt="" />
-          <h2 id="player-title">Выберите трек</h2>
-          <p id="player-artist">Здесь воспроизводятся только полные треки из открытого источника.</p>
-          <audio id="audio" controls></audio>
-          <a id="source-link" class="source-link" href="#" target="_blank" rel="noreferrer">
-            Открыть источник
-          </a>
-        </aside>
-
-        <section class="results-panel">
-          <div class="results-head">
-            <h2>Результаты</h2>
-            <span id="status">Готов к поиску</span>
+      <section class="workspace">
+        <header class="topbar">
+          <form class="search" id="search-form">
+            <label for="query">Поиск</label>
+            <div class="search-row">
+              <input id="query" name="query" type="search" value="lofi" autocomplete="off" />
+              <button type="submit">Найти</button>
+            </div>
+          </form>
+          <div class="status-card">
+            <span>Статус</span>
+            <strong id="status">Готов к поиску</strong>
           </div>
-          <div id="results" class="results"></div>
+        </header>
+
+        <section class="content-grid">
+          <section class="results-panel">
+            <div class="section-head">
+              <div>
+                <p>Каталог</p>
+                <h1>Найденные треки</h1>
+              </div>
+              <span class="mode-badge">только full stream</span>
+            </div>
+            <div id="results" class="results"></div>
+          </section>
+
+          <aside class="details-panel">
+            <img id="player-cover" class="player-cover" src="/logo.svg" alt="" />
+            <div class="track-meta">
+              <p>Сейчас играет</p>
+              <h2 id="player-title">Выберите трек</h2>
+              <span id="player-artist">Плеер появится после выбора результата.</span>
+            </div>
+            <a id="source-link" class="source-link" href="#" target="_blank" rel="noreferrer">
+              Открыть источник
+            </a>
+          </aside>
         </section>
       </section>
+
+      <footer class="player-bar">
+        <div class="mini-track">
+          <img id="mini-cover" src="/logo.svg" alt="" />
+          <div>
+            <strong id="mini-title">Ничего не выбрано</strong>
+            <span id="mini-artist">Запустите трек из списка</span>
+          </div>
+        </div>
+        <audio id="audio" controls></audio>
+      </footer>
     </main>
+
     <script src="/app.js" type="module"></script>
   </body>
 </html>
