@@ -379,6 +379,46 @@ h1 {
   display: none;
 }
 
+.lyrics-card {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.lyrics-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lyrics-head h3 {
+  font-size: 18px;
+}
+
+.lyrics-head button {
+  min-height: 36px;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: var(--accent-2);
+  color: #17120a;
+  font-weight: 850;
+}
+
+.lyrics-head button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.lyrics-card pre {
+  max-height: 320px;
+  margin: 14px 0 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  color: #d7dde5;
+  font: 14px/1.55 inherit;
+}
+
 .empty {
   min-height: 240px;
   display: grid;

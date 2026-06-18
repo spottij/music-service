@@ -30,6 +30,35 @@ function sendText(response, statusCode, text) {
   response.end(text);
 }
 
+async function fetchLyrics(artistName, trackName) {
+  const url = new URL("https://lrclib.net/api/get");
+  url.searchParams.set("artist_name", artistName);
+  url.searchParams.set("track_name", trackName);
+
+  const response = await fetch(url, {
+    headers: {
+      "User-Agent": "Wavebox/0.2 student-project"
+    },
+    signal: AbortSignal.timeout(7000)
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Lyrics API error: ${response.status}`);
+  }
+
+  const payload = await response.json();
+  return {
+    trackName: payload.trackName,
+    artistName: payload.artistName,
+    plainLyrics: payload.plainLyrics || null,
+    syncedLyrics: payload.syncedLyrics || null
+  };
+}
+
 async function handleApi(request, response, url) {
   if (url.pathname === "/api/v1/health") {
     sendJson(response, 200, {
@@ -62,6 +91,39 @@ async function handleApi(request, response, url) {
       sendJson(response, 502, {
         error: "PROVIDER_ERROR",
         message: "Не удалось получить ответ от музыкальных провайдеров.",
+        details: error.message
+      });
+    }
+    return;
+  }
+
+  if (url.pathname === "/api/v1/lyrics") {
+    const artistName = (url.searchParams.get("artist") || "").trim();
+    const trackName = (url.searchParams.get("track") || "").trim();
+
+    if (artistName.length < 1 || trackName.length < 1) {
+      sendJson(response, 400, {
+        error: "BAD_LYRICS_QUERY",
+        message: "Нужны artist и track для поиска текста."
+      });
+      return;
+    }
+
+    try {
+      const lyrics = await fetchLyrics(artistName, trackName);
+      if (!lyrics?.plainLyrics && !lyrics?.syncedLyrics) {
+        sendJson(response, 404, {
+          error: "LYRICS_NOT_FOUND",
+          message: "Текст песни не найден."
+        });
+        return;
+      }
+
+      sendJson(response, 200, lyrics);
+    } catch (error) {
+      sendJson(response, 502, {
+        error: "LYRICS_PROVIDER_ERROR",
+        message: "Не удалось получить текст песни.",
         details: error.message
       });
     }
@@ -110,4 +172,3 @@ const server = createServer(async (request, response) => {
 server.listen(PORT, () => {
   console.log(`Open Music Service started: http://localhost:${PORT}`);
 });
-

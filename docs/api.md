@@ -52,6 +52,23 @@ GET /search?q={query}&limit=6
 API возвращает только треки с полным `streamUrl`. Если провайдер дает только
 короткий фрагмент, такой результат не попадает в выдачу.
 
+## Lyrics
+
+```http
+GET /lyrics?artist={artistName}&track={trackName}
+```
+
+Ответ:
+
+```json
+{
+  "trackName": "Yellow",
+  "artistName": "Coldplay",
+  "plainLyrics": "Look at the stars...",
+  "syncedLyrics": null
+}
+```
+
 ## Будущие endpoints
 
 ```http

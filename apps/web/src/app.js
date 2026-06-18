@@ -12,6 +12,10 @@ const playerArtist = document.querySelector("#player-artist");
 const miniTitle = document.querySelector("#mini-title");
 const miniArtist = document.querySelector("#mini-artist");
 const sourceLink = document.querySelector("#source-link");
+const lyricsButton = document.querySelector("#lyrics-button");
+const lyricsText = document.querySelector("#lyrics-text");
+
+let currentTrack = null;
 
 function formatDuration(seconds) {
   if (!seconds) {
@@ -40,7 +44,41 @@ function setStatus(text) {
   statusLabel.textContent = text;
 }
 
+function normalizeLyricsQuery(value) {
+  return String(value || "")
+    .replace(/\([^)]*\)/g, "")
+    .replace(/\[[^\]]*]/g, "")
+    .replace(/\b(official|audio|video|lyrics|lyric|remix|live|full album)\b/gi, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function loadLyrics(track) {
+  if (!track) {
+    lyricsText.textContent = "Выберите трек, чтобы посмотреть текст.";
+    return;
+  }
+
+  lyricsButton.disabled = true;
+  lyricsText.textContent = "Ищу текст песни...";
+
+  const artist = normalizeLyricsQuery(track.artistName);
+  const title = normalizeLyricsQuery(track.title);
+  const response = await fetch(`/api/v1/lyrics?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(title)}`);
+  const payload = await response.json();
+
+  lyricsButton.disabled = false;
+
+  if (!response.ok) {
+    lyricsText.textContent = payload.message || "Текст песни не найден.";
+    return;
+  }
+
+  lyricsText.textContent = payload.plainLyrics || payload.syncedLyrics || "Текст песни не найден.";
+}
+
 function setPlayer(track) {
+  currentTrack = track;
   const cover = track.coverUrl || "/logo.svg";
   const subtitle = `${track.artistName}${track.albumTitle ? ` · ${track.albumTitle}` : ""}`;
 
@@ -51,6 +89,10 @@ function setPlayer(track) {
   playerArtist.textContent = subtitle;
   miniArtist.textContent = subtitle;
   sourceLink.href = track.sourceUrl || "#";
+  loadLyrics(track).catch(() => {
+    lyricsButton.disabled = false;
+    lyricsText.textContent = "Не удалось загрузить текст песни.";
+  });
 
   if (track.embedUrl) {
     audio.pause();
@@ -66,6 +108,13 @@ function setPlayer(track) {
   audio.src = track.streamUrl;
   audio.play().catch(() => {});
 }
+
+lyricsButton.addEventListener("click", () => {
+  loadLyrics(currentTrack).catch(() => {
+    lyricsButton.disabled = false;
+    lyricsText.textContent = "Не удалось загрузить текст песни.";
+  });
+});
 
 function renderTracks(tracks) {
   results.innerHTML = "";
