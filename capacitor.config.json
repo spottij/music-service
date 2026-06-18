@@ -3,6 +3,7 @@
   "appName": "Wavebox",
   "webDir": "apps/web/src",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "cleartext": true
   }
 }

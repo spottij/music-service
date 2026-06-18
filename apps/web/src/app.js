@@ -14,9 +14,14 @@ const miniArtist = document.querySelector("#mini-artist");
 const sourceLink = document.querySelector("#source-link");
 const lyricsButton = document.querySelector("#lyrics-button");
 const lyricsText = document.querySelector("#lyrics-text");
-const apiBase = window.WAVEBOX_CONFIG?.apiBase || "";
+const apiSettingsForm = document.querySelector("#api-settings");
+const apiBaseInput = document.querySelector("#api-base");
+const apiHelp = document.querySelector("#api-help");
 
 let currentTrack = null;
+let apiBase = localStorage.getItem("wavebox.apiBase") || window.WAVEBOX_CONFIG?.apiBase || "";
+
+apiBaseInput.value = apiBase;
 
 function formatDuration(seconds) {
   if (!seconds) {
@@ -45,6 +50,39 @@ function setStatus(text) {
   statusLabel.textContent = text;
 }
 
+function createApiUrl(path) {
+  return `${apiBase.replace(/\/+$/, "")}${path}`;
+}
+
+function isProbablyPackagedApp() {
+  return window.location.protocol !== "http:" && window.location.protocol !== "https:";
+}
+
+async function requestJson(path) {
+  const response = await fetch(createApiUrl(path));
+  const text = await response.text();
+
+  try {
+    const payload = JSON.parse(text);
+    if (!response.ok) {
+      throw new Error(payload.message || "Ошибка запроса.");
+    }
+    return payload;
+  } catch (error) {
+    if (text.trim().toLowerCase().startsWith("<!doctype") || text.includes("<html")) {
+      throw new Error(
+        "API-сервер не настроен. Для APK укажи адрес backend в поле API server URL."
+      );
+    }
+
+    if (error instanceof SyntaxError) {
+      throw new Error("API вернул не JSON. Проверь адрес backend-сервера.");
+    }
+
+    throw error;
+  }
+}
+
 function normalizeLyricsQuery(value) {
   return String(value || "")
     .replace(/\([^)]*\)/g, "")
@@ -65,17 +103,15 @@ async function loadLyrics(track) {
 
   const artist = normalizeLyricsQuery(track.artistName);
   const title = normalizeLyricsQuery(track.title);
-  const response = await fetch(`${apiBase}/api/v1/lyrics?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(title)}`);
-  const payload = await response.json();
 
-  lyricsButton.disabled = false;
-
-  if (!response.ok) {
-    lyricsText.textContent = payload.message || "Текст песни не найден.";
-    return;
+  try {
+    const payload = await requestJson(`/api/v1/lyrics?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(title)}`);
+    lyricsText.textContent = payload.plainLyrics || payload.syncedLyrics || "Текст песни не найден.";
+  } catch (error) {
+    lyricsText.textContent = error.message || "Не удалось загрузить текст песни.";
+  } finally {
+    lyricsButton.disabled = false;
   }
-
-  lyricsText.textContent = payload.plainLyrics || payload.syncedLyrics || "Текст песни не найден.";
 }
 
 function setPlayer(track) {
@@ -90,10 +126,7 @@ function setPlayer(track) {
   playerArtist.textContent = subtitle;
   miniArtist.textContent = subtitle;
   sourceLink.href = track.sourceUrl || "#";
-  loadLyrics(track).catch(() => {
-    lyricsButton.disabled = false;
-    lyricsText.textContent = "Не удалось загрузить текст песни.";
-  });
+  loadLyrics(track);
 
   if (track.embedUrl) {
     audio.pause();
@@ -111,10 +144,7 @@ function setPlayer(track) {
 }
 
 lyricsButton.addEventListener("click", () => {
-  loadLyrics(currentTrack).catch(() => {
-    lyricsButton.disabled = false;
-    lyricsText.textContent = "Не удалось загрузить текст песни.";
-  });
+  loadLyrics(currentTrack);
 });
 
 function renderTracks(tracks) {
@@ -162,16 +192,26 @@ async function searchTracks(query) {
   setStatus("Ищу треки...");
   results.innerHTML = '<p class="empty">Запрашиваю YouTube и открытые аудиокаталоги.</p>';
 
-  const response = await fetch(`${apiBase}/api/v1/search?q=${encodeURIComponent(query)}&limit=6`);
-  const payload = await response.json();
-
-  if (!response.ok) {
-    throw new Error(payload.message || "Ошибка поиска");
-  }
+  const payload = await requestJson(`/api/v1/search?q=${encodeURIComponent(query)}&limit=6`);
 
   renderTracks(payload.items);
   setStatus(`Найдено: ${payload.count}`);
 }
+
+apiSettingsForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  apiBase = apiBaseInput.value.trim().replace(/\/+$/, "");
+  localStorage.setItem("wavebox.apiBase", apiBase);
+  apiHelp.textContent = apiBase ? `Сохранено: ${apiBase}` : "Сохранено: используется текущий origin.";
+
+  try {
+    await searchTracks(queryInput.value.trim());
+  } catch (error) {
+    setStatus("Ошибка");
+    results.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
+  }
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -190,7 +230,12 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-searchTracks(queryInput.value).catch((error) => {
-  setStatus("Ошибка");
-  results.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
-});
+if (isProbablyPackagedApp() && !apiBase) {
+  setStatus("Нужен API");
+  results.innerHTML = '<p class="empty">Для APK укажи адрес backend-сервера в поле API server URL, например http://192.168.0.15:3000.</p>';
+} else {
+  searchTracks(queryInput.value).catch((error) => {
+    setStatus("Ошибка");
+    results.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
+  });
+}
