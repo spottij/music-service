@@ -1,23 +1,17 @@
 const { app, BrowserWindow } = require("electron");
-const { fork } = require("node:child_process");
 const path = require("node:path");
+const { pathToFileURL } = require("node:url");
 
 const PORT = process.env.PORT || "3130";
-let apiProcess = null;
+let apiServer = null;
 let mainWindow = null;
 
-function startApi() {
+async function startApi() {
   const rootDir = app.getAppPath();
   const serverPath = path.join(rootDir, "apps", "api", "src", "server.js");
+  const serverModule = await import(pathToFileURL(serverPath).href);
 
-  apiProcess = fork(serverPath, [], {
-    cwd: rootDir,
-    env: {
-      ...process.env,
-      PORT
-    },
-    stdio: "ignore"
-  });
+  apiServer = serverModule.startServer({ port: PORT });
 }
 
 function createWindow() {
@@ -38,9 +32,9 @@ function createWindow() {
   mainWindow.loadURL(`http://127.0.0.1:${PORT}`);
 }
 
-app.whenReady().then(() => {
-  startApi();
-  setTimeout(createWindow, 800);
+app.whenReady().then(async () => {
+  await startApi();
+  createWindow();
 });
 
 app.on("activate", () => {
@@ -56,7 +50,7 @@ app.on("window-all-closed", () => {
 });
 
 app.on("before-quit", () => {
-  if (apiProcess) {
-    apiProcess.kill();
+  if (apiServer) {
+    apiServer.close();
   }
 });

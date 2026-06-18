@@ -4,7 +4,7 @@ import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { searchAllProviders } from "../../../packages/providers/src/index.js";
 
-const PORT = Number(process.env.PORT || 3000);
+const DEFAULT_PORT = Number(process.env.PORT || 3000);
 const ROOT_DIR = fileURLToPath(new URL("../../..", import.meta.url));
 const WEB_DIR = join(ROOT_DIR, "apps", "web", "src");
 
@@ -158,17 +158,28 @@ async function serveStatic(response, pathname) {
   }
 }
 
-const server = createServer(async (request, response) => {
-  const url = new URL(request.url || "/", `http://${request.headers.host}`);
+export function startServer(options = {}) {
+  const port = Number(options.port || DEFAULT_PORT);
+  const server = createServer(async (request, response) => {
+    const url = new URL(request.url || "/", `http://${request.headers.host}`);
 
-  if (url.pathname.startsWith("/api/")) {
-    await handleApi(request, response, url);
-    return;
-  }
+    if (url.pathname.startsWith("/api/")) {
+      await handleApi(request, response, url);
+      return;
+    }
 
-  await serveStatic(response, url.pathname);
-});
+    await serveStatic(response, url.pathname);
+  });
 
-server.listen(PORT, () => {
-  console.log(`Open Music Service started: http://localhost:${PORT}`);
-});
+  server.listen(port, () => {
+    console.log(`Open Music Service started: http://localhost:${port}`);
+  });
+
+  return server;
+}
+
+const isDirectRun = process.argv[1] && import.meta.url === new URL(process.argv[1], "file:").href;
+
+if (isDirectRun) {
+  startServer();
+}
