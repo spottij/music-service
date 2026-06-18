@@ -2,10 +2,33 @@
   "name": "open-music-service",
   "version": "0.1.0",
   "private": true,
-  "description": "Учебный музыкальный сервис с поиском полных треков по открытым API.",
+  "description": "Учебный музыкальный сервис с поиском по открытым API и YouTube.",
   "type": "module",
+  "main": "desktop/main.cjs",
   "scripts": {
     "dev": "node apps/api/src/server.js",
-    "check": "node --check apps/api/src/server.js && node --check packages/providers/src/index.js && node --check packages/providers/src/internetArchive.js && node --check packages/providers/src/audius.js && node --check packages/providers/src/youtube.js && node --check packages/shared/src/track.js && node --check apps/web/src/app.js"
+    "check": "node --check apps/api/src/server.js && node --check packages/providers/src/index.js && node --check packages/providers/src/internetArchive.js && node --check packages/providers/src/audius.js && node --check packages/providers/src/youtube.js && node --check packages/shared/src/track.js && node --check apps/web/src/app.js && node --check desktop/main.cjs",
+    "desktop": "electron .",
+    "package:win": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "ru.urfu.wavebox",
+    "productName": "Wavebox",
+    "files": [
+      "apps/**/*",
+      "packages/**/*",
+      "desktop/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    }
   }
 }

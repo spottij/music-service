@@ -20,6 +20,7 @@
 - YouTube embed-плеер для YouTube-результатов.
 - Audio-плеер для прямых `streamUrl`.
 - Ссылка на страницу источника.
+- Desktop-упаковка под Windows через Electron.
 
 ## Структура
 
@@ -72,3 +73,8 @@ node --check packages/providers/src/youtube.js
 node --check packages/shared/src/track.js
 node --check apps/web/src/app.js
 ```
+
+## Windows EXE
+
+Сборка описана в [docs/packaging.md](docs/packaging.md). На GitHub добавлен
+workflow `Build Windows EXE`, который собирает скачиваемый artifact.
